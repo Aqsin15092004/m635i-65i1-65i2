@@ -1,22 +1,26 @@
-# app.py - Demo Python Tətbiqi
+# app.py - Demo Python Application
 
-def toplayin(a, b):
-    """İki ədədi topla"""
+
+def add(a, b):
+    """Add two numbers"""
     return a + b
 
-def vurun(a, b):
-    """İki ədədi vur"""
+
+def multiply(a, b):
+    """Multiply two numbers"""
     return a * b
 
-def faktorial(n):
-    """n-in faktorialını hesabla"""
+
+def factorial(n):
+    """Calculate factorial of n"""
     if n < 0:
-        raise ValueError("Mənfi ədədin faktorialı yoxdur!")
+        raise ValueError("Factorial is not defined for negative numbers!")
     if n == 0 or n == 1:
         return 1
-    return n * faktorial(n - 1)
+    return n * factorial(n - 1)
+
 
 if __name__ == "__main__":
-    print(f"5 + 3 = {toplayin(5, 3)}")
-    print(f"4 x 6 = {vurun(4, 6)}")
-    print(f"5! = {faktorial(5)}")
+    print(f"5 + 3 = {add(5, 3)}")
+    print(f"4 x 6 = {multiply(4, 6)}")
+    print(f"5! = {factorial(5)}")
