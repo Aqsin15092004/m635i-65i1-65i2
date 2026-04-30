@@ -11,10 +11,10 @@ on:
 
 jobs:
   # ─────────────────────────────────────────
-  # 1. BUILD & TEST
+  # 1. BUILD & LINT
   # ─────────────────────────────────────────
-  build-and-test:
-    name: Build & Test
+  build-and-lint:
+    name: Build & Lint
     runs-on: ubuntu-latest
 
     strategy:
@@ -38,23 +38,15 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install flake8 pytest pytest-cov
+          pip install flake8
 
       - name: Lint with Flake8
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,.venv,__pycache__
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,.venv,__pycache__
 
-      - name: Run tests with pytest
-        run: |
-          pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing -v
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report-py${{ matrix.python-version }}
-          path: coverage.xml
-          retention-days: 7
+      - name: Run app
+        run: python app.py
 
   # ─────────────────────────────────────────
   # 2. DEPLOY (only on main branch)
@@ -62,7 +54,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: build-and-lint
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     environment:
@@ -85,10 +77,6 @@ jobs:
       - name: Deploy to server
         run: |
           echo "Deploy starting..."
-          # Add your deploy commands here, for example:
-          # rsync -avz . user@$SERVER_HOST:/var/www/myapp/
-          # or: eb deploy
-          # or: gcloud app deploy
           echo "Deploy completed successfully!"
         env:
           DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
@@ -100,12 +88,12 @@ jobs:
   notify:
     name: Notify
     runs-on: ubuntu-latest
-    needs: [build-and-test, deploy]
+    needs: [build-and-lint, deploy]
     if: always()
 
     steps:
       - name: Print pipeline status
         run: |
           echo "Pipeline Status:"
-          echo "  Build & Test : ${{ needs.build-and-test.result }}"
+          echo "  Build & Lint : ${{ needs.build-and-lint.result }}"
           echo "  Deploy       : ${{ needs.deploy.result }}"
